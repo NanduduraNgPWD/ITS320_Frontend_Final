@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { HeroSectionComponent } from './components/hero-section/hero-section.component';
 import { LoginComponent } from './auth/login/login.component';
 import { SignupComponent } from './auth/signup/signup.component';
+import { RecipesComponent } from './pages/recipes/recipes.component';
 // import { authGuard } from './guards/auth.guard';
 // import { authProtectedGuard } from './guards/auth-protected.guard';
 
@@ -9,6 +10,7 @@ export const routes: Routes = [
     { path: 'login', component: LoginComponent },
     { path: 'signup', component: SignupComponent },
     { path: 'home', component: HeroSectionComponent },
+    { path: 'recipes', component: RecipesComponent },
     // { path: 'todo', component: ToDoListComponent }
     // { path: '', redirectTo: 'login', pathMatch: 'full' }
 ];
