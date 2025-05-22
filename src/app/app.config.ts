@@ -1,15 +1,9 @@
-import { ApplicationConfig } from '@angular/core';
-import { provideRouter, Routes } from '@angular/router';
+import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { provideRouter } from '@angular/router';
 
-// Define routes
-const routes: Routes = [
-  { path: '', redirectTo: 'home', pathMatch: 'full' },
-  { path: 'home', loadComponent: () => import('./app.component').then(m => m.AppComponent) },
-  { path: '**', redirectTo: 'home' }
-];
+import { routes } from './app.routes';
+import { provideHttpClient, withFetch } from '@angular/common/http';
 
 export const appConfig: ApplicationConfig = {
-  providers: [
-    provideRouter(routes)
-  ]
+  providers: [provideZoneChangeDetection({ eventCoalescing: true }), provideRouter(routes), provideHttpClient(withFetch())]
 };
