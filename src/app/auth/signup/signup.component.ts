@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
-
+import { RouterModule } from '@angular/router';
 @Component({
-  selector: 'app-signup',
-  imports: [],
+  selector: 'signup',
+  imports: [RouterModule],
   templateUrl: './signup.component.html',
   styleUrl: './signup.component.css'
 })
