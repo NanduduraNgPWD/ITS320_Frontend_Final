@@ -10,15 +10,19 @@ import {
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
   
-  constructor(private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    // Get the token from local storage
-    const token = localStorage.getItem('token');
+    // Get the token from auth service
+    const token = this.authService.token;
     
     // If token exists, add it to request headers
     if (token) {
@@ -34,9 +38,8 @@ export class AuthInterceptor implements HttpInterceptor {
       catchError((error: HttpErrorResponse) => {
         // Handle 401 Unauthorized errors
         if (error.status === 401) {
-          // Clear local storage and redirect to login
-          localStorage.removeItem('token');
-          localStorage.removeItem('user');
+          // Use auth service logout method and redirect
+          this.authService.logout();
           this.router.navigate(['/login']);
         }
         
