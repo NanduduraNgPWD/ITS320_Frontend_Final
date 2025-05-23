@@ -6,6 +6,7 @@ export interface Recipe {
   title: string;
   image: string;
   views: number;
+  description: string;
 }
 
 @Component({
