@@ -1,15 +1,16 @@
-import { Component } from '@angular/core';
-import { NgFor, NgIf } from '@angular/common';
+import { Component, inject } from '@angular/core';
+import { CommonModule, NgFor, NgIf } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { Router } from '@angular/router';
 @Component({
   selector: 'profile',
-  imports: [NgFor, NgIf, RouterModule],
+  imports: [NgFor, NgIf, RouterModule, CommonModule],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
 export class ProfileComponent {
   activeTab = 'profile';
-
+  private router = inject(Router);
   navigationItems = [
     { key: 'profile', label: 'My Profile' },
     { key: 'recipes', label: 'My Recipes' },
@@ -18,8 +19,7 @@ export class ProfileComponent {
     { key: 'team-member', label: 'Team Member' },
     { key: 'notifications', label: 'Notifications' },
     { key: 'billing', label: 'Billing' },
-    { key: 'data-export', label: 'Data Export' },
-    { key: 'delete-account', label: 'Delete Account' }
+    { key: 'data-export', label: 'Data Export' }
   ];
 
   userProfile = {
@@ -81,7 +81,15 @@ export class ProfileComponent {
     }
   ];
 
+  logout(): void {
+    // Clear authentication data
+    localStorage.removeItem('token'); // Adjust based on your auth implementation
+    // You might also want to call your auth service logout method
+    // this.authService.logout();
 
+    // Redirect to home page
+    this.router.navigate(['/home']);
+  }
   setActiveTab(tab: string) {
     this.activeTab = tab;
   }

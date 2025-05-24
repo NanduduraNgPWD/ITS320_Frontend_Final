@@ -30,12 +30,17 @@ import { RouterModule } from '@angular/router';
                     <a routerLink="/signup" class="border border-gray-800 rounded-full px-6 py-2 font-medium">Signup</a>
                 </div>
                 
+                   <ng-container *ngIf="isLoggedIn()">
+                <a routerLink="/profile" class=" rounded-full px-6 py-2 font-medium">Profile</a>
+            </ng-container>
+
                 <!-- Show logout button when logged in -->
-                <div *ngIf="isLoggedIn()">
+                <!-- <div *ngIf="isLoggedIn()">
                     <button (click)="logout()" class="border border-red-600 text-red-600 rounded-full px-6 py-2 font-medium hover:bg-red-600 hover:text-white transition-colors">
                         Logout
                     </button>
-                </div>
+                </div> -->
+
             </div>
         </nav>
 
