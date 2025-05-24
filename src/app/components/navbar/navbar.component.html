@@ -10,13 +10,23 @@
         <div class="hidden md:flex space-x-14">
             <a href="/home" class="font-medium">Home</a>
             <a href="/recipes" class="font-medium">Recipes</a>
-            <a href="/recipe-form" class="font-medium">Features</a>
+            <a href="/recipe-form" class="font-medium ">Features</a>
             <a href="/contact" class="font-medium">Contact</a>
         </div>
 
+
         <div class="flex items-center space-x-4">
-            <a routerLink="/login" class="font-medium">Login</a>
-            <a routerLink="/signup" class="border border-gray-800 rounded-full px-6 py-2 font-medium">Signup</a>
+            <!-- Show when user is NOT logged in -->
+            <ng-container *ngIf="!isLoggedIn">
+                <a routerLink="/login" class="font-medium">Login</a>
+                <a routerLink="/signup" class="border border-gray-800 rounded-full px-6 py-2 font-medium">Signup</a>
+            </ng-container>
+
+            <!-- Show when user IS logged in -->
+            <ng-container *ngIf="isLoggedIn">
+                <a routerLink="/profile" class=" rounded-full px-6 py-2 font-medium">Profile</a>
+            </ng-container>
         </div>
+
     </nav>
 </header>
