@@ -1,29 +1,52 @@
 import { Routes } from '@angular/router';
 import { HeroSectionComponent } from './components/hero-section/hero-section.component';
-import { LoginComponent } from './auth/login/login.component';
-import { SignupComponent } from './auth/signup/signup.component';
+import { LoginComponent } from './components/login/login.component';
+import { SignupComponent } from './components/signup/signup.component';
 import { RecipesComponent } from './pages/recipes/recipes.component';
-import { RecipeFormComponent } from './components/recipe-form/recipe-form.component';
-import { ProfileComponent } from './pages/profile/profile.component';
-// import { authGuard } from './guards/auth.guard';
-// import { authProtectedGuard } from './guards/auth-protected.guard';
+// You'll need to create these components
+// import { FeaturesComponent } from './pages/features/features.component';
+// import { ContactComponent } from './pages/contact/contact.component';
+import { AuthGuard } from './guards/auth.guard';
+import { RedirectGuard } from './guards/redirect.guard';
 
 export const routes: Routes = [
-    { path: 'login', component: LoginComponent },
-    { path: 'signup', component: SignupComponent },
-    { path: 'home', component: HeroSectionComponent },
-    { path: 'recipes', component: RecipesComponent },
-    { path: 'recipe-form', component: RecipeFormComponent },
-    { path: 'profile', component: ProfileComponent },
-    // { path: 'todo', component: ToDoListComponent }
-    // { path: '', redirectTo: 'login', pathMatch: 'full' }
+    {
+        path: 'login',
+        component: LoginComponent,
+        canActivate: [RedirectGuard] // Redirect to home if already logged in
+    },
+    {
+        path: 'signup',
+        component: SignupComponent,
+        canActivate: [RedirectGuard] // Redirect to home if already logged in
+    },
+    {
+        path: 'home',
+        component: HeroSectionComponent
+    },
+    {
+        path: 'recipes',
+        component: RecipesComponent,
+        canActivate: [AuthGuard] // Protect this route - require authentication
+    },
+    // Uncomment these when you create the components
+    // { 
+    //     path: 'features', 
+    //     component: FeaturesComponent,
+    //     canActivate: [AuthGuard] // Protect this route - require authentication
+    // },
+    // { 
+    //     path: 'contact', 
+    //     component: ContactComponent,
+    //     canActivate: [AuthGuard] // Protect this route - require authentication
+    // },
+    {
+        path: '',
+        redirectTo: '/home',
+        pathMatch: 'full'
+    },
+    {
+        path: '**',
+        redirectTo: '/home'
+    }
 ];
-
-
-// export const routes: Routes = [
-//     { path: 'login', component: LoginComponent, canActivate: [authGuard] },
-//     { path: 'register', component: SignupComponent, canActivate: [authGuard] },
-//     { path: 'home', component: HomeComponent, canActivate: [authProtectedGuard] },
-//     { path: 'todo', component: ToDoListComponent, canActivate: [authProtectedGuard] },
-//     { path: '', redirectTo: 'login', pathMatch: 'full' }
-// ];
