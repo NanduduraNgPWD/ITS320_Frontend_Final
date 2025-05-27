@@ -4,6 +4,7 @@ import { LoginComponent } from './components/login/login.component';
 import { SignupComponent } from './components/signup/signup.component';
 import { RecipesComponent } from './pages/recipes/recipes.component';
 import { ProfileComponent } from './pages/profile/profile.component'
+import { RecipeFormComponent } from './components/recipe-form/recipe-form.component';
 // You'll need to create these components
 // import { FeaturesComponent } from './pages/features/features.component';
 // import { ContactComponent } from './pages/contact/contact.component';
@@ -15,6 +16,11 @@ export const routes: Routes = [
         path: 'login',
         component: LoginComponent,
         canActivate: [RedirectGuard] // Redirect to home if already logged in
+    },
+    {
+        path: 'recipe-form',
+        component: RecipeFormComponent
+
     },
     {
         path: 'signup',
