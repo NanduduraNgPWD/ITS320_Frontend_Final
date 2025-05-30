@@ -1,22 +1,66 @@
-import { Component, signal } from '@angular/core';
-import { NgFor } from '@angular/common';
+import { Component, signal, OnInit, inject } from '@angular/core';
+import { NgFor, NgIf } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { RecipeCardComponent, Recipe } from '../../components/recipe-card/recipe-card.component';
 
 interface Category {
   id: string;
   name: string;
   icon: string;
+}
 
+// API Response interface matching your backend structure
+interface ApiRecipe {
+  _id: string;
+  title: string;
+  description: string;
+  category: string;
+  tags: string[];
+  ingredients: Array<{
+    quantity: string;
+    unit: string;
+    name: string;
+    group: string;
+    _id: string;
+  }>;
+  instructions: Array<{
+    step: number;
+    text: string;
+    image: string;
+    _id: string;
+  }>;
+  prepTime: number;
+  cookTime: number;
+  servings: number;
+  author: string;
+  image: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
+interface ApiResponse {
+  success: boolean;
+  count: number;
+  data: ApiRecipe[];
 }
 
 @Component({
   selector: 'app-recipes',
-  imports: [NgFor, RecipeCardComponent],
+  imports: [NgFor, NgIf, RecipeCardComponent],
   templateUrl: './recipes.component.html',
   styleUrl: './recipes.component.css'
 })
-export class RecipesComponent {
+export class RecipesComponent implements OnInit {
+  private http = inject(HttpClient);
+
   selectedCategory = signal<string>('all-types');
+  recipes = signal<Recipe[]>([]);
+  isLoading = signal<boolean>(false);
+  error = signal<string | null>(null);
+
+  private readonly API_URL = 'http://localhost:3000/api/getrecipe';
 
   categories: Category[] = [
     { id: 'all-types', name: 'All Types', icon: '🍽️' },
@@ -30,57 +74,85 @@ export class RecipesComponent {
     { id: 'quick-easy', name: 'Quick & Easy Supper', icon: '⏰' }
   ];
 
-  // static data recipes
-  recipes: Recipe[] = [
-    {
-      id: '1',
-      title: 'Fresh Salad with Tahini Sauce',
-      image: 'https://images.unsplash.com/photo-1546549032-9571cd6b27df?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      views: 250,
-      description: 'A refreshing mix of crisp greens topped with a creamy, tangy tahini dressing—perfect for a light and healthy meal.'
-    },
-    {
-      id: '2',
-      title: 'Chili con Carne with Nachos',
-      image: 'https://plus.unsplash.com/premium_photo-1671403963864-6d46f3b62352?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8Zm9vZCUyMHBsYXRlfGVufDB8fDB8fHww',
-      views: 150,
-      description: 'Hearty and flavorful chili packed with tender beef, beans, and spices, served with crispy nacho chips.'
-    },
-    {
-      id: '3',
-      title: 'Sour & Spicy Korean Kimchi',
-      image: 'https://images.unsplash.com/photo-1612927601601-6638404737ce?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Zm9vZCUyMHBsYXRlfGVufDB8fDB8fHww',
-      views: 200,
-      description: 'Traditional fermented Korean cabbage with bold, spicy, and tangy flavors—great as a side or ingredient.'
-    },
-    {
-      id: '4',
-      title: 'Mediterranean Grilled Chicken',
-      image: 'https://images.unsplash.com/photo-1723362120818-bc8b54e8229d?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGZvb2QlMjBwbGF0ZXxlbnwwfHwwfHx8MA%3D%3D',
-      views: 180,
-      description: 'Juicy grilled chicken marinated in herbs, lemon, and olive oil—served with a fresh Mediterranean twist.'
-    },
-    {
-      id: '5',
-      title: 'Chocolate Lava Cake',
-      image: 'https://images.unsplash.com/photo-1710091691771-96b2e6d17dac?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjZ8fGZvb2QlMjBwbGF0ZXxlbnwwfHwwfHx8MA%3D%3D',
-      views: 320,
-      description: 'A rich and decadent dessert with a warm, gooey chocolate center that oozes with every bite.'
-    },
-    {
-      id: '6',
-      title: 'Asian Stir Fry Vegetables',
-      image: 'https://plus.unsplash.com/premium_photo-1670263779633-5309cae32f13?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NDV8fGZvb2QlMjBwbGF0ZXxlbnwwfHwwfHx8MA%3D%3D',
-      views: 140,
-      description: 'A colorful medley of crisp vegetables tossed in a savory soy-based sauce for a quick and healthy dish.'
-    }
-  ];
+  ngOnInit(): void {
+    this.loadRecipes();
+  }
 
+  private loadRecipes(): void {
+    this.isLoading.set(true);
+    this.error.set(null);
+
+    this.http.get<ApiResponse>(this.API_URL).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          const mappedRecipes = response.data.map(this.mapApiRecipeToRecipe);
+          this.recipes.set(mappedRecipes);
+        } else {
+          this.error.set('Failed to load recipes');
+        }
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Error fetching recipes:', err);
+        this.error.set('Failed to load recipes. Please try again.');
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  private mapApiRecipeToRecipe(apiRecipe: ApiRecipe): Recipe {
+    return {
+      id: apiRecipe._id,
+      title: apiRecipe.title,
+      image: apiRecipe.image || 'https://images.unsplash.com/photo-1546549032-9571cd6b27df?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80', // fallback image
+      views: 0, // API doesn't provide views, so defaulting to 0
+      description: apiRecipe.description,
+      category: apiRecipe.category,
+      tags: apiRecipe.tags,
+      ingredients: apiRecipe.ingredients,
+      instructions: apiRecipe.instructions,
+      prepTime: apiRecipe.prepTime,
+      cookTime: apiRecipe.cookTime,
+      servings: apiRecipe.servings,
+      author: apiRecipe.author
+    };
+  }
 
   //Getter for filtered recipes
   get filteredRecipes(): Recipe[] {
-    // add filtering logic later 
-    return this.recipes;
+    const allRecipes = this.recipes();
+
+    if (this.selectedCategory() === 'all-types') {
+      return allRecipes;
+    }
+
+    // Filter by category - you might need to adjust this logic based on your category mapping
+    return allRecipes.filter(recipe => {
+      const selectedCat = this.selectedCategory();
+
+      // Map your frontend categories to backend categories
+      switch (selectedCat) {
+        case 'appetizers':
+          return recipe.category === 'appetizer' || recipe.tags?.includes('appetizer');
+        case 'main-courses':
+          return recipe.category === 'main-course' || recipe.category === 'dinner' || recipe.tags?.includes('main');
+        case 'salads-sides':
+          return recipe.category === 'salad' || recipe.category === 'side' || recipe.tags?.includes('side');
+        case 'vegetarian':
+          return recipe.category === 'vegetarian' || recipe.tags?.includes('vegetarian');
+        case 'international':
+          return recipe.tags?.includes('international') || recipe.tags?.includes('ethnic');
+        case 'desserts':
+          return recipe.category === 'dessert' || recipe.tags?.includes('dessert') || recipe.tags?.includes('sweet');
+        case 'healthy':
+          return recipe.tags?.includes('healthy') || recipe.tags?.includes('low-calorie');
+        case 'quick-easy':
+          return recipe.tags?.includes('quick') || recipe.tags?.includes('easy') ||
+            ((recipe.prepTime || 0) + (recipe.cookTime || 0)) <= 30;
+        default:
+          return recipe.category === selectedCat;
+      }
+    });
   }
 
   selectCategory(categoryId: string): void {
@@ -96,5 +168,10 @@ export class RecipesComponent {
     }
 
     return 'bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-100 hover:border-gray-300';
+  }
+
+  // Method to refresh recipes
+  refreshRecipes(): void {
+    this.loadRecipes();
   }
 }

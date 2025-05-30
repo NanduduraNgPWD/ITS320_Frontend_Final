@@ -1,10 +1,14 @@
 import { Routes } from '@angular/router';
 import { HeroSectionComponent } from './components/hero-section/hero-section.component';
+
 import { LoginComponent } from './components/login/login.component';
 import { SignupComponent } from './components/signup/signup.component';
-import { RecipesComponent } from './pages/recipes/recipes.component';
+
 import { ProfileComponent } from './pages/profile/profile.component'
+
+import { RecipesComponent } from './pages/recipes/recipes.component';
 import { RecipeFormComponent } from './components/recipe-form/recipe-form.component';
+import { RecipePageComponent } from './pages/recipe-page/recipe-page.component';
 // You'll need to create these components
 // import { FeaturesComponent } from './pages/features/features.component';
 // import { ContactComponent } from './pages/contact/contact.component';
@@ -35,6 +39,11 @@ export const routes: Routes = [
         path: 'recipes',
         component: RecipesComponent,
         canActivate: [AuthGuard] // Protect this route - require authentication
+    },
+    {
+        path: 'recipe-page/:id',
+        component: RecipePageComponent
+
     },
     {
         path: 'profile',
