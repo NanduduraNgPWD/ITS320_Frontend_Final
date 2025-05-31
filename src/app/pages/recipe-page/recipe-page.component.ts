@@ -124,6 +124,22 @@ export class RecipePageComponent implements OnInit {
     });
   }
 
+  getIngredientGroups(ingredients: Ingredient[]): { name: string; items: Ingredient[] }[] {
+    const groups = ingredients.reduce((acc, ingredient) => {
+      const groupName = ingredient.group || 'Main';
+      if (!acc[groupName]) {
+        acc[groupName] = [];
+      }
+      acc[groupName].push(ingredient);
+      return acc;
+    }, {} as { [key: string]: Ingredient[] });
+
+    return Object.keys(groups).map(name => ({
+      name: name === 'Main' ? '' : name,
+      items: groups[name]
+    }));
+  }
+
   private mapApiRecipeToRecipe(apiRecipe: ApiRecipe): Recipe {
     return {
       id: apiRecipe._id,
